@@ -10,7 +10,7 @@ template Multiplier3 () {
    signal input c;
    signal output d;  
    var x = a * b;
-   var y = a * c;
+   var y = x * c;
 
    // Constraints.  
    d <== y;  

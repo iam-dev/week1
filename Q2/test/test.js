@@ -132,11 +132,12 @@ describe("Multiplier3 with PLONK", function () {
 
         const argv = inputData.replace(/["[\]\s]/g, "").split(',').map(x => BigInt(x).toString());
         console.log("argv", argv);
-        
-
+    
         expect(await multiplierPlonkVerifier.verifyProof(proofData, argv)).to.be.true;
     });
     it("Should return false for invalid proof", async function () {
-        //[assignment] insert your script here
+        const proofData = 0;
+        const argv = [0];
+        expect(await multiplierPlonkVerifier.verifyProof(proofData, argv)).to.be.false;
     });
 });
