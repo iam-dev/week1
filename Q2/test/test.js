@@ -34,13 +34,20 @@ describe("HelloWorld", function () {
     });
 
     it("Should return true for correct proof", async function () {
-        //[assignment] Add comments to explain what each line is doing
+        // Step 1 prover proove and generate wasm and zero knowlegde key
         const { proof, publicSignals } = await groth16.fullProve({"a":"1","b":"2"}, "contracts/circuits/HelloWorld/HelloWorld_js/HelloWorld.wasm","contracts/circuits/HelloWorld/circuit_final.zkey");
+        console.log('proof', proof);
+        console.log('publicSignals', publicSignals);
 
-        console.log('1x2 =',publicSignals[0]);
+
+        // publicSignals[0] should return 2 
+        console.log('1x2 =', publicSignals[0]);
 
         const editedPublicSignals = unstringifyBigInts(publicSignals);
+        console.log('editedPublicSignals', editedPublicSignals);
         const editedProof = unstringifyBigInts(proof);
+        console.log('editedProof', editedProof);
+        // generate callData that can be use for smart contract input using groth16
         const calldata = await groth16.exportSolidityCallData(editedProof, editedPublicSignals);
     
         const argv = calldata.replace(/["[\]\s]/g, "").split(',').map(x => BigInt(x).toString());
@@ -54,6 +61,7 @@ describe("HelloWorld", function () {
         const Input = argv.slice(8);
         console.log("Input", Input);
 
+        // Verify inputs!: check the smart contract verifyProof function
         expect(await verifier.verifyProof(a, b, c, Input)).to.be.true;
     });
     it("Should return false for invalid proof", async function () {
@@ -76,13 +84,14 @@ describe("Multiplier3 with Groth16", function () {
     });
 
     it("Should return true for correct proof", async function () {
-        //[assignment] Add comments to explain what each line is doing
+        // Step 1 prover proove and generate wasm and zero knowlegde key
         const { proof, publicSignals } = await groth16.fullProve({"a":"1","b":"2", "c": "3"}, "contracts/circuits/Multiplier/Multiplier3_js/Multiplier3.wasm","contracts/circuits/Multiplier/circuit_final.zkey");
 
         console.log('1x2x3 =',publicSignals[0]);
 
         const editedPublicSignals = unstringifyBigInts(publicSignals);
         const editedProof = unstringifyBigInts(proof);
+        // generate callData that can be use for smart contract input using groth16
         const calldata = await groth16.exportSolidityCallData(editedProof, editedPublicSignals);
     
         const argv = calldata.replace(/["[\]\s]/g, "").split(',').map(x => BigInt(x).toString());
@@ -96,7 +105,7 @@ describe("Multiplier3 with Groth16", function () {
         console.log("c", c);
         const Input = argv.slice(8);
         console.log("Input", Input);
-
+        // Verify proof within Groth16 Smart contract
         expect(await multiplierVerifier.verifyProof(a, b, c, Input)).to.be.true;
     });
     it("Should return false for invalid proof", async function () {
@@ -125,6 +134,7 @@ describe("Multiplier3 with PLONK", function () {
 
         const editedPublicSignals = unstringifyBigInts(publicSignals);
         const editedProof = unstringifyBigInts(proof);
+        // generate callData that can be use for smart contract input using PLONK
         const calldata = await plonk.exportSolidityCallData(editedProof, editedPublicSignals);
         console.log("calldata", calldata);
         // calldata needs to be seperated
@@ -133,6 +143,7 @@ describe("Multiplier3 with PLONK", function () {
         const argv = inputData.replace(/["[\]\s]/g, "").split(',').map(x => BigInt(x).toString());
         console.log("argv", argv);
     
+        // Verify proof within PLONK Smart contract
         expect(await multiplierPlonkVerifier.verifyProof(proofData, argv)).to.be.true;
     });
     it("Should return false for invalid proof", async function () {
